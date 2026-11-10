@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0e2a2f">
+<title>Rafiq Mansion Maintenance Committee</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo"><img src="logo.png" alt="" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fa-solid fa-building\'></i>'"></div>
+      <div><b>Rafiq Mansion</b><small>Maintenance Committee</small></div>
+    </div>
+    <nav id="nav">
+      <button data-view="dash" class="on"><i class="fa-solid fa-chart-column"></i><span>Overview</span></button>
+      <button data-view="month"><i class="fa-solid fa-calendar-days"></i><span>Monthly</span></button>
+      <button data-view="tx"><i class="fa-solid fa-pen-to-square"></i><span>Entries</span></button>
+      <button data-view="set"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div><h1 id="title">Overview</h1><p>Accounts, ledger and monthly dues</p></div>
+      <label class="yr">Year <select id="sel-year"></select></label>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section id="v-dash" class="view on">
+      <div class="kpis">
+        <div class="kpi"><span>Opening balance</span><b id="k-open"></b></div>
+        <div class="kpi in"><span>Collected</span><b id="k-in"></b></div>
+        <div class="kpi out"><span>Spent</span><b id="k-out"></b></div>
+        <div class="kpi net"><span>Cash in hand</span><b id="k-net"></b></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h3>Collected vs spent, by month</h3><div class="legend"><i class="d in"></i>Collected <i class="d out"></i>Spent</div></div>
+        <div class="chart" id="chart"></div>
+      </div>
+      <div class="two">
+        <div class="panel"><div class="ph"><h3>Where the money went</h3></div><div id="catbars"></div></div>
+        <div class="panel"><div class="ph"><h3>Share and export</h3></div>
+          <div class="stack">
+            <button class="btn wa" id="b-wa"><i class="fa-brands fa-whatsapp"></i> Share summary on WhatsApp</button>
+            <button class="btn xl" id="b-xl"><i class="fa-solid fa-file-excel"></i> Download Excel ledger</button>
+            <button class="btn pd" id="b-pdf"><i class="fa-solid fa-file-pdf"></i> Download PDF report</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MONTHLY -->
+    <section id="v-month" class="view">
+      <div class="panel">
+        <div class="ph"><h3>Month-by-month accounts</h3></div>
+        <div class="scroll"><table id="t-month"></table></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h3>Flat-wise payments</h3><div class="legend"><i class="d in"></i>Paid <i class="d part"></i>Part paid <i class="d out"></i>Due</div></div>
+        <div class="scroll"><table id="t-matrix" class="matrix"></table></div>
+      </div>
+    </section>
+
+    <!-- ENTRIES -->
+    <section id="v-tx" class="view">
+      <div class="two">
+        <div class="panel">
+          <div class="ph"><h3>Record a collection</h3></div>
+          <form id="f-inc">
+            <label>Flat / shop<select id="inc-flat" required></select></label>
+            <div class="row">
+              <label>For month<select id="inc-month"></select></label>
+              <label>Amount (Rs.)<input type="number" id="inc-amount" min="1" required></label>
+            </div>
+            <label>Date received<input type="date" id="inc-date" required></label>
+            <button class="btn in-b" type="submit"><i class="fa-solid fa-plus"></i> Add collection</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Record an expense</h3></div>
+          <form id="f-exp">
+            <label>Category<select id="exp-cat" required></select></label>
+            <div class="row">
+              <label>Amount (Rs.)<input type="number" id="exp-amount" min="1" required></label>
+              <label>Date paid<input type="date" id="exp-date" required></label>
+            </div>
+            <label>Details<input type="text" id="exp-desc" placeholder="e.g. Paid to electrician" required></label>
+            <button class="btn out-b" type="submit"><i class="fa-solid fa-plus"></i> Add expense</button>
+          </form>
+        </div>
+      </div>
+      <div class="filter">Show <select id="sel-month"></select></div>
+      <div class="two">
+        <div class="panel flush"><div class="ph in-h"><h3>Collections</h3><b id="s-inc"></b></div>
+          <div class="scroll"><table><thead><tr><th>Date</th><th>Flat</th><th>Month</th><th class="r">Amount</th><th></th></tr></thead><tbody id="b-inc"></tbody></table></div></div>
+        <div class="panel flush"><div class="ph out-h"><h3>Expenses</h3><b id="s-exp"></b></div>
+          <div class="scroll"><table><thead><tr><th>Date</th><th>Category</th><th>Details</th><th class="r">Amount</th><th></th></tr></thead><tbody id="b-exp"></tbody></table></div></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="v-set" class="view">
+      <div class="two">
+        <div class="panel">
+          <div class="ph"><h3>Balances and dues</h3></div>
+          <label>Opening cash balance for the year (Rs.)<input type="number" id="inp-open"></label>
+          <label>Monthly maintenance per flat / shop (Rs.)<input type="number" id="inp-charge"></label>
+          <button class="btn pri" id="b-save-set">Save settings</button>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>Backup</h3></div>
+          <p class="note">Data lives only in this browser. Download a backup regularly and restore it on a new phone or computer.</p>
+          <div class="stack">
+            <button class="btn sec" id="b-backup"><i class="fa-solid fa-download"></i> Download backup</button>
+            <label class="btn sec file"><i class="fa-solid fa-upload"></i> Restore backup<input type="file" id="f-restore" accept=".json" hidden></label>
+          </div>
+        </div>
+      </div>
+      <div class="two">
+        <div class="panel"><div class="ph"><h3>Flats and shops</h3></div>
+          <div class="inline"><input type="text" id="inp-flat" placeholder="e.g. Flat 501 or Shop 03"><button class="btn pri" id="b-flat">Add</button></div>
+          <div class="tags" id="flat-tags"></div></div>
+        <div class="panel"><div class="ph"><h3>Expense categories</h3></div>
+          <div class="inline"><input type="text" id="inp-cat" placeholder="e.g. Electric work"><button class="btn pri" id="b-cat">Add</button></div>
+          <div class="tags" id="cat-tags"></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="script.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(e => console.error('SW failed', e)));
+}
+</script>
+</body>
+</html>

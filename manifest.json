@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest.json",
+  "id": "com.rafiqmansion.maintenance",
+  "name": "Rafiq Mansion Maintenance Committee",
+  "short_name": "Rafiq Ledger",
+  "description": "Smart Accounts, Ledger & Maintenance Management System for Rafiq Mansion",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e2a2f",
+  "theme_color": "#0e2a2f",
+  "lang": "en-US",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
